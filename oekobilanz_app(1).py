@@ -1,17 +1,27 @@
 import pandas as pd
 import streamlit as st
 
+# Prüfen, ob openpyxl installiert ist
+try:
+    import openpyxl
+except ImportError:
+    st.error("Fehlende Abhängigkeit: Bitte `openpyxl` installieren. Falls du Streamlit Cloud nutzt, füge `openpyxl` zu deiner `requirements.txt` hinzu.")
+
 # Datei-Upload über Streamlit
 st.sidebar.header("📂 Datei-Upload")
 uploaded_file = st.sidebar.file_uploader("Bitte Excel-Datei hochladen", type=["xlsx"])
 
 def load_data(file):
     if file is not None:
-        xls = pd.ExcelFile(file)
-        oekobilanz_df = xls.parse("Ökobilanzrechner")
-        auswahlfelder_df = xls.parse("Auswahlfelder")
-        baumaterialien_df = xls.parse("Baumaterialien Matériaux")
-        return oekobilanz_df, auswahlfelder_df, baumaterialien_df
+        try:
+            xls = pd.ExcelFile(file, engine="openpyxl")
+            oekobilanz_df = xls.parse("Ökobilanzrechner")
+            auswahlfelder_df = xls.parse("Auswahlfelder")
+            baumaterialien_df = xls.parse("Baumaterialien Matériaux")
+            return oekobilanz_df, auswahlfelder_df, baumaterialien_df
+        except Exception as e:
+            st.error(f"Fehler beim Laden der Datei: {e}")
+            return None, None, None
     else:
         return None, None, None
 
